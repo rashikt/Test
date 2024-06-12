@@ -1,63 +1,60 @@
 pipeline {
-    agent {
-        docker {
-            image 'python:3.8-slim'
-            args '-v /tmp:/tmp'
-        }
-    }
+    agent any
 
     environment {
+        // Define the Python version and virtual environment directory
+        PYTHON_VERSION = '3.8'
         VENV_DIR = 'venv'
     }
 
     stages {
         stage('Setup') {
             steps {
-                script {
-                    echo 'Setting up the environment...'
-                    // Create a virtual environment
-                    sh 'python -m venv ${VENV_DIR}'
-                }
+                echo 'Setting up the environment...'
+                // Install the specified Python version if not already available
+                sh '''
+                    if ! command -v python${PYTHON_VERSION} &>/dev/null; then
+                        sudo apt-get update
+                        sudo apt-get install -y python${PYTHON_VERSION}
+                    fi
+                '''
+                // Create a virtual environment
+                sh "python${PYTHON_VERSION} -m venv ${VENV_DIR}"
             }
         }
 
         stage('Install Dependencies') {
             steps {
-                script {
-                    echo 'Installing dependencies...'
-                    // Activate the virtual environment and install dependencies
-                    sh '''
-                        . ${VENV_DIR}/bin/activate
-                        pip install --upgrade pip
-                        pip install -r requirements.txt
-                    '''
-                }
+                echo 'Installing dependencies...'
+                // Activate the virtual environment and install dependencies
+                sh '''
+                    . ${VENV_DIR}/bin/activate
+                    pip install --upgrade pip
+                    pip install -r requirements.txt
+                '''
             }
         }
-//
+
 //         stage('Run Tests') {
 //             steps {
-//                 script {
-//                     echo 'Running tests...'
-//                     // Activate the virtual environment and run tests
-//                     sh '''
-//                         . ${VENV_DIR}/bin/activate
-//                         pytest
-//                     '''
-//                 }
+//                 echo 'Running tests...'
+//                 // Activate the virtual environment and run tests
+//                 sh '''
+//                     . ${VENV_DIR}/bin/activate
+//                     pytest
+//                 '''
 //             }
 //         }
 //
 //         stage('Package') {
 //             steps {
-//                 script {
-//                     echo 'Packaging application...'
-//                     // Package the application if necessary
-//                     sh '''
-//                         . ${VENV_DIR}/bin/activate
-//                         python setup.py sdist bdist_wheel
-//                     '''
-//                 }
+//                 echo 'Packaging application...'
+//                 // Package the application if necessary
+//                 sh '''
+//                     . ${VENV_DIR}/bin/activate
+//                     # For example, if using setuptools:
+//                     python setup.py sdist bdist_wheel
+//                 '''
 //             }
 //         }
     }
@@ -66,7 +63,7 @@ pipeline {
         always {
             echo 'Cleaning up...'
             // Clean up virtual environment
-            sh 'rm -rf ${VENV_DIR}'
+            sh "rm -rf ${VENV_DIR}"
         }
         success {
             echo 'Build succeeded!'
