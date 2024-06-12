@@ -7,10 +7,15 @@ pipeline {
 
     stages {
         stage('Setup') {
-            steps {
+              steps {
                 echo 'Setting up the environment...'
+                // Update package list and install dependencies
+                sh '''
+                    apt-get update
+                    command -v python3.8 || apt-get install -y python3.8 python3.8-venv
+                '''
                 // Create a virtual environment
-                sh 'python3 -m venv ${VENV_DIR}'
+                sh 'python3.8 -m venv ${VENV_DIR}'
             }
         }
 
