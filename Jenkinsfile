@@ -1,25 +1,26 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'python:3.8-slim' // Specify the Docker image with Python 3.8
+            args '--user root' // Run as root user to ensure permission for apt-get
+        }
+    }
 
     environment {
-        // Define the Python version and virtual environment directory
-        PYTHON_VERSION = '3.8'
-        VENV_DIR = 'venv'
+        VENV_DIR = 'venv' // Define the virtual environment directory
     }
 
     stages {
         stage('Setup') {
             steps {
                 echo 'Setting up the environment...'
-                // Install the specified Python version if not already available
+                // Update package list and install dependencies
                 sh '''
-                    if ! command -v python${PYTHON_VERSION} &>/dev/null; then
-                        apt-get update
-                        apt-get install -y python${PYTHON_VERSION}
-                    fi
+                    apt-get update
+                    command -v python3.8 || apt-get install -y python3.8 python3.8-venv
                 '''
                 // Create a virtual environment
-                sh "python${PYTHON_VERSION} -m venv ${VENV_DIR}"
+                sh 'python3.8 -m venv ${VENV_DIR}'
             }
         }
 
@@ -52,7 +53,6 @@ pipeline {
 //                 // Package the application if necessary
 //                 sh '''
 //                     . ${VENV_DIR}/bin/activate
-//                     # For example, if using setuptools:
 //                     python setup.py sdist bdist_wheel
 //                 '''
 //             }
@@ -63,7 +63,7 @@ pipeline {
         always {
             echo 'Cleaning up...'
             // Clean up virtual environment
-            sh "rm -rf ${VENV_DIR}"
+            sh 'rm -rf ${VENV_DIR}'
         }
         success {
             echo 'Build succeeded!'
