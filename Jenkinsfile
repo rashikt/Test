@@ -1,10 +1,5 @@
 pipeline {
-    agent {
-        docker {
-            image 'python:3.8-slim' // Specify the Docker image with Python 3.8
-            args '--user root' // Run as root user to ensure permission for apt-get
-        }
-    }
+    agent any
 
     environment {
         VENV_DIR = 'venv' // Define the virtual environment directory
@@ -14,13 +9,8 @@ pipeline {
         stage('Setup') {
             steps {
                 echo 'Setting up the environment...'
-                // Update package list and install dependencies
-                sh '''
-                    apt-get update
-                    command -v python3.8 || apt-get install -y python3.8 python3.8-venv
-                '''
                 // Create a virtual environment
-                sh 'python3.8 -m venv ${VENV_DIR}'
+                sh 'python3 -m venv ${VENV_DIR}'
             }
         }
 
