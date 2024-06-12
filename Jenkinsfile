@@ -14,8 +14,8 @@ pipeline {
                 // Install the specified Python version if not already available
                 sh '''
                     if ! command -v python${PYTHON_VERSION} &>/dev/null; then
-                        sudo apt-get update
-                        sudo apt-get install -y python${PYTHON_VERSION}
+                        apt-get update
+                        apt-get install -y python${PYTHON_VERSION}
                     fi
                 '''
                 // Create a virtual environment
