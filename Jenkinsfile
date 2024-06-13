@@ -6,16 +6,25 @@ pipeline {
     }
 
     stages {
-        stage('Setup') {
-              steps {
-                echo 'Setting up the environment...'
-                // Update package list and install dependencies
+        stage('Install Python 3') {
+            steps {
+                echo 'Installing Python 3...'
+                // Install Python 3
                 sh '''
-                    apt-get update
-                    command -v python3.8 || apt-get install -y python3.8 python3.8-venv
+                    if ! command -v python3 &> /dev/null
+                    then
+                        sudo apt-get update
+                        sudo apt-get install -y python3 python3-venv python3-pip
+                    fi
                 '''
+            }
+        }
+
+        stage('Setup') {
+            steps {
+                echo 'Setting up the environment...'
                 // Create a virtual environment
-                sh 'python3.8 -m venv ${VENV_DIR}'
+                sh 'python3 -m venv ${VENV_DIR}'
             }
         }
 
