@@ -6,20 +6,6 @@ pipeline {
     }
 
     stages {
-        stage('Install Python 3') {
-            steps {
-                echo 'Installing Python 3...'
-                // Install Python 3
-                sh '''
-                    if ! command -v python3 &> /dev/null
-                    then
-                        sudo apt-get update
-                        sudo apt-get install -y python3 python3-venv python3-pip
-                    fi
-                '''
-            }
-        }
-
         stage('Setup') {
             steps {
                 echo 'Setting up the environment...'
